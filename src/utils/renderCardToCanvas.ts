@@ -56,19 +56,34 @@ export async function renderCardToCanvas(
 
     // ── 3. Preload fonts ────────────────────────────────────────────────
     //    Canvas 2D needs fonts loaded before fillText() can use them.
-    //    We extract just the primary font family (before any comma fallback)
-    //    because document.fonts.load() can choke on fallback lists.
     try {
         const fontLoadPromises: Promise<FontFace[]>[] = [];
+        const preloadSpans: HTMLSpanElement[] = [];
+
         for (const layer of template.layers) {
             const cfg = layer[lang] ?? layer.en;
-            // Extract primary font only: "Karbon, Inter, sans-serif" → "Karbon"
             const primaryFont = cfg.fontFamily.split(',')[0].trim();
-            const fontSpec = `${cfg.fontWeight} ${cfg.fontSize}px ${primaryFont}`;
+            const safePrimaryFont = primaryFont.replace(/['"]/g, '');
+            const fontSpec = `${cfg.fontWeight} ${cfg.fontSize}px "${safePrimaryFont}"`;
+
             fontLoadPromises.push(document.fonts.load(fontSpec));
+
+            // iOS Safari workaround: force font load by adding to DOM
+            const span = document.createElement('span');
+            span.style.fontFamily = `"${safePrimaryFont}", ${cfg.fontFamily}`;
+            span.style.fontWeight = cfg.fontWeight.toString();
+            span.style.position = 'absolute';
+            span.style.opacity = '0';
+            span.style.pointerEvents = 'none';
+            span.innerText = 'اختبار test';
+            document.body.appendChild(span);
+            preloadSpans.push(span);
         }
         await Promise.all(fontLoadPromises);
         await document.fonts.ready;
+
+        // Clean up DOM preloads after a short delay to ensure rendering
+        setTimeout(() => preloadSpans.forEach(span => span.remove()), 150);
     } catch (e) {
         // Font loading failed — continue anyway, browser will use fallback
         console.warn('Font preloading failed, using fallback fonts:', e);
@@ -81,8 +96,11 @@ export async function renderCardToCanvas(
 
         ctx.save();
 
-        // Font — use full family string so canvas can try fallbacks
-        ctx.font = `${cfg.fontWeight} ${cfg.fontSize}px ${cfg.fontFamily}`;
+        // Font — use full family string so canvas can try fallbacks, but explicitly quote the primary font
+        const primaryFont = cfg.fontFamily.split(',')[0].trim().replace(/['"]/g, '');
+        const fallbacks = cfg.fontFamily.split(',').slice(1).join(',');
+        ctx.font = `${cfg.fontWeight} ${cfg.fontSize}px "${primaryFont}"${fallbacks ? `, ${fallbacks}` : ''}`;
+
         ctx.fillStyle = layer.color;
         ctx.globalAlpha = layer.opacity;
         ctx.textBaseline = 'top';
@@ -100,13 +118,17 @@ export async function renderCardToCanvas(
         const textX = layer.x + padding;
         const textY = layer.y + padding;
 
-        // Set text direction for Arabic (wrapped in try-catch for older browsers)
+        // Set text direction for Arabic
         try {
             if (lang === 'ar') {
                 ctx.direction = 'rtl';
+                ctx.canvas.dir = 'rtl';
+            } else {
+                ctx.direction = 'ltr';
+                ctx.canvas.dir = 'ltr';
             }
         } catch {
-            // ctx.direction not supported — text still renders, just no RTL shaping
+            // ctx.direction not supported
         }
 
         // Text alignment
@@ -122,6 +144,9 @@ export async function renderCardToCanvas(
         const lines = text.split('\n');
         const lineHeight = cfg.fontSize * 1.3;
         for (let i = 0; i < lines.length; i++) {
+            // iOS Canvas Arabic shaping bypass logic:
+            // Sometimes ctx.fillText needs a zero-width joiner or just simple mapping.
+            // Modern iOS Safari handles it if the font is loaded via DOM, which we did above.
             ctx.fillText(lines[i], alignX, textY + i * lineHeight);
         }
 
