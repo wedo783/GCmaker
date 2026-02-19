@@ -42,6 +42,7 @@ export interface TemplateConfig {
   orientation: Orientation;
   layers: TextLayer[];
   isPublished: boolean;
+  isActive: boolean; // Controls whether this card shows up in the user page nav bar
   lastPublishedAt: string | null;
 }
 
@@ -105,6 +106,7 @@ export const DEFAULT_TEMPLATE: TemplateConfig = {
     },
   ],
   isPublished: false,
+  isActive: true,
   lastPublishedAt: null,
 };
 

@@ -4,7 +4,9 @@ import LeftPanel from '../components/Admin/LeftPanel';
 import RightPanel from '../components/Admin/RightPanel';
 import CanvasRenderer from '../components/Shared/CanvasRenderer';
 import { Save, Eye, Globe, RotateCcw, Link2, Check, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { DEFAULT_TEMPLATE } from '../types';
 
 const i18n = {
@@ -37,13 +39,34 @@ const i18n = {
 };
 
 const AdminPage: React.FC = () => {
-    const { template, setTemplate, publishTemplate, publishing, publishError, shareUrl, language, toggleLanguage, updateLayer } = useCard();
+    const { template, setTemplate, publishTemplate, publishedTemplate, publishing, publishError, shareUrl, language, toggleLanguage, updateLayer } = useCard();
     const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
     const [scale, setScale] = useState(0.5);
     const [publishFlash, setPublishFlash] = useState(false);
     const [copied, setCopied] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const { cardId } = useParams<{ cardId: string }>();
     const t = i18n[language];
+
+    // Load explicitly from DB if opening an existing card
+    useEffect(() => {
+        const loadCard = async () => {
+            if (cardId && cardId !== 'new') {
+                try {
+                    const snap = await getDoc(doc(db, 'cards', cardId));
+                    if (snap.exists()) {
+                        setTemplate(snap.data() as any);
+                    }
+                } catch (e) {
+                    console.error("Error loading card:", e);
+                }
+            } else if (cardId === 'new') {
+                setTemplate({ ...DEFAULT_TEMPLATE, id: `new-${Date.now()}`, slug: '' });
+            }
+        };
+        // Only load if it's our first time mounting or cardId changes
+        loadCard();
+    }, [cardId]);
 
     // Preview slug as user types
     const previewSlug = toSlug(template.slug || template.id || 'my-card');
@@ -85,7 +108,12 @@ const AdminPage: React.FC = () => {
 
     const handleReset = () => {
         if (window.confirm(t.resetConfirm)) {
-            setTemplate({ ...DEFAULT_TEMPLATE, id: `default-${Date.now()}`, slug: 'my-card' });
+            // Revert to published version if editing existing
+            if (publishedTemplate && cardId !== 'new') {
+                setTemplate(publishedTemplate);
+            } else {
+                setTemplate({ ...DEFAULT_TEMPLATE, id: `default-${Date.now()}`, slug: '' });
+            }
             setSelectedLayerId(null);
         }
     };
@@ -95,6 +123,7 @@ const AdminPage: React.FC = () => {
             {/* Top Bar */}
             <header className="admin-topbar">
                 <div className="admin-topbar-brand">
+                    <Link to="/admin" className="btn btn-ghost" style={{ padding: 6, marginRight: 10 }}>← Back</Link>
                     <div className="brand-icon">G</div>
                     <span className="brand-name">{t.cardBuilder}</span>
                     <span className="badge">{t.beta}</span>

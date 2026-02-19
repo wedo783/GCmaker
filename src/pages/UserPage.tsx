@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useAuthSettings } from '../context/AuthSettingsContext';
 import { useCard } from '../context/CardContext';
 import PreviewContainer from '../components/User/PreviewContainer';
 import { Download, Share2, AlertCircle, Loader2, Globe } from 'lucide-react';
@@ -39,8 +40,32 @@ const UserPage: React.FC = () => {
     const [inputs, setInputs] = useState<Record<string, string>>({});
     const [downloading, setDownloading] = useState(false);
     const [activeTemplate, setActiveTemplate] = useState<TemplateConfig | null>(null);
+    const [occasions, setOccasions] = useState<TemplateConfig[]>([]);
     const [loading, setLoading] = useState(true);
+    const { settings } = useAuthSettings();
     const t = i18n[language];
+
+    useEffect(() => {
+        const fetchOccasions = async () => {
+            try {
+                // Fetch all cards and only show active ones
+                const snap = await getDocs(collection(db, 'cards'));
+                const fetched = snap.docs.map(d => d.data() as TemplateConfig)
+                    .filter(c => c.isActive !== false) // Treat missing isActive as true
+                    .sort((a, b) => a.slug.localeCompare(b.slug));
+                setOccasions(fetched);
+
+                // If there's no slug in the URL, pick the first active occasion if exists
+                if (!slug && fetched.length > 0 && !publishedTemplate) {
+                    window.history.replaceState(null, '', `/${fetched[0].slug}`);
+                    setActiveTemplate(fetched[0]);
+                }
+            } catch (err) {
+                console.error("Failed to load occasions.", err);
+            }
+        };
+        fetchOccasions();
+    }, []);
 
     // Load template: from Firestore if slug present, else from local context
     useEffect(() => {
@@ -171,7 +196,7 @@ const UserPage: React.FC = () => {
                     <div className="user-header-logo">
                         <div className="user-header-logo-icon">GC</div>
                         <span className="user-header-logo-text">
-                            {language === 'en' ? 'GC Maker' : 'صانع البطاقات'}
+                            {language === 'en' ? settings.appNameEn : settings.appNameAr}
                         </span>
                     </div>
 
@@ -208,6 +233,36 @@ const UserPage: React.FC = () => {
                         </button>
                     </div>
                 </div>
+
+                {/* Navbar for active Occasions */}
+                {occasions.length > 0 && (
+                    <div className="user-occasions-nav" style={{
+                        gap: 12, padding: '12px 20px',
+                        overflowX: 'auto', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        justifyContent: 'center',
+                        display: 'flex'
+                    }}>
+                        {occasions.map(occ => (
+                            <a
+                                key={occ.slug}
+                                href={`/${occ.slug}`}
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: 99,
+                                    whiteSpace: 'nowrap',
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    textDecoration: 'none',
+                                    transition: 'all 0.2s',
+                                    color: (activeTemplate?.slug === occ.slug) ? '#fff' : 'var(--text-secondary)',
+                                    background: (activeTemplate?.slug === occ.slug) ? 'var(--accent)' : 'rgba(255,255,255,0.05)'
+                                }}
+                            >
+                                {occ.slug.replace(/-/g, ' ')}
+                            </a>
+                        ))}
+                    </div>
+                )}
             </header>
 
             {/* Main Grid */}
