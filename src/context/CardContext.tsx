@@ -48,7 +48,7 @@ function migrateTemplate(t: any): TemplateConfig {
         } as TextLayer;
     });
 
-    return { ...t, layers: migratedLayers, headerUrl: t.headerUrl ?? null } as TemplateConfig;
+    return { ...t, layers: migratedLayers } as TemplateConfig;
 }
 
 interface CardContextType {

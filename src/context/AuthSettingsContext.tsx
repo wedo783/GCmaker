@@ -9,13 +9,17 @@ interface GlobalSettings {
     appNameAr: string;
     primaryColor: string;
     accentColor: string;
+    logoUrlEn: string | null;
+    logoUrlAr: string | null;
 }
 
 const DEFAULT_SETTINGS: GlobalSettings = {
     appNameEn: 'GC Maker',
     appNameAr: 'صانع البطاقات',
     primaryColor: '#1c3258',
-    accentColor: '#3faf6e'
+    accentColor: '#3faf6e',
+    logoUrlEn: null,
+    logoUrlAr: null
 };
 
 interface AuthSettingsContextType {

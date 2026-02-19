@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { useAuthSettings } from '../context/AuthSettingsContext';
@@ -19,7 +19,27 @@ const AdminDashboard: React.FC = () => {
     const [appNameAr, setAppNameAr] = useState(settings.appNameAr);
     const [primaryColor, setPrimaryColor] = useState(settings.primaryColor);
     const [accentColor, setAccentColor] = useState(settings.accentColor);
+    const [logoUrlEn, setLogoUrlEn] = useState(settings.logoUrlEn);
+    const [logoUrlAr, setLogoUrlAr] = useState(settings.logoUrlAr);
     const [savingSettings, setSavingSettings] = useState(false);
+
+    const logoEnRef = useRef<HTMLInputElement>(null);
+    const logoArRef = useRef<HTMLInputElement>(null);
+
+    const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>, lang: 'en' | 'ar') => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const b64 = ev.target?.result as string;
+                if (b64) {
+                    if (lang === 'en') setLogoUrlEn(b64);
+                    else setLogoUrlAr(b64);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     useEffect(() => {
         if (!authLoading && !user) navigate('/admin/login');
@@ -70,7 +90,7 @@ const AdminDashboard: React.FC = () => {
 
     const handleSaveSettings = async () => {
         setSavingSettings(true);
-        await updateSettings({ appNameEn, appNameAr, primaryColor, accentColor });
+        await updateSettings({ appNameEn, appNameAr, primaryColor, accentColor, logoUrlEn, logoUrlAr });
         setSavingSettings(false);
         setShowSettings(false);
     };
@@ -122,6 +142,38 @@ const AdminDashboard: React.FC = () => {
                             </div>
                         </div>
                     </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 20 }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 13, marginBottom: 5 }}>Logo (English)</label>
+                            <div className="upload-zone" onClick={() => logoEnRef.current?.click()}>
+                                {logoUrlEn ? (
+                                    <img src={logoUrlEn} alt="En Logo Preview" style={{ maxHeight: 60 }} />
+                                ) : (
+                                    <span className="upload-zone-text">Click to upload</span>
+                                )}
+                                <input type="file" ref={logoEnRef} onChange={(e) => handleLogoUpload(e, 'en')} accept="image/*" style={{ display: 'none' }} />
+                            </div>
+                            {logoUrlEn && (
+                                <button className="btn btn-danger-ghost" style={{ marginTop: 8, padding: 4 }} onClick={() => setLogoUrlEn(null)}>Remove</button>
+                            )}
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 13, marginBottom: 5 }}>Logo (Arabic)</label>
+                            <div className="upload-zone" onClick={() => logoArRef.current?.click()}>
+                                {logoUrlAr ? (
+                                    <img src={logoUrlAr} alt="Ar Logo Preview" style={{ maxHeight: 60 }} />
+                                ) : (
+                                    <span className="upload-zone-text">Click to upload</span>
+                                )}
+                                <input type="file" ref={logoArRef} onChange={(e) => handleLogoUpload(e, 'ar')} accept="image/*" style={{ display: 'none' }} />
+                            </div>
+                            {logoUrlAr && (
+                                <button className="btn btn-danger-ghost" style={{ marginTop: 8, padding: 4 }} onClick={() => setLogoUrlAr(null)}>Remove</button>
+                            )}
+                        </div>
+                    </div>
+
                     <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={handleSaveSettings} disabled={savingSettings}>
                         {savingSettings ? 'Saving...' : 'Save Theme & Settings'}
                     </button>

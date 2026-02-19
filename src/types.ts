@@ -37,7 +37,6 @@ export interface TemplateConfig {
   slug: string;
   cardLanguage: 'en' | 'ar';
   backgroundUrl: string | null;
-  headerUrl: string | null;     // admin-uploadable header banner for the user page
   dimensions: PosterDimensions;
   orientation: Orientation;
   layers: TextLayer[];
@@ -80,7 +79,6 @@ export const DEFAULT_TEMPLATE: TemplateConfig = {
   slug: 'my-card',
   cardLanguage: 'en',
   backgroundUrl: null,
-  headerUrl: null,
   dimensions: { width: 1080, height: 1080, dpi: 72, label: 'Instagram Post' },
   orientation: 'portrait',
   layers: [

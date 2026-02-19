@@ -11,7 +11,6 @@ const CUSTOM_LABEL = 'Custom';
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ template, setTemplate }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const headerInputRef = useRef<HTMLInputElement>(null);
 
     const isCustom = template.dimensions.label === CUSTOM_LABEL;
     const [customW, setCustomW] = useState(String(isCustom ? template.dimensions.width : 1080));
@@ -24,19 +23,6 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ template, setTemplate }) => {
             reader.onload = (ev) => {
                 if (ev.target?.result) {
                     setTemplate({ ...template, backgroundUrl: ev.target.result as string });
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleHeaderUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                if (ev.target?.result) {
-                    setTemplate({ ...template, headerUrl: ev.target.result as string });
                 }
             };
             reader.readAsDataURL(file);
@@ -125,55 +111,6 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ template, setTemplate }) => {
                         onClick={(e) => { e.stopPropagation(); setTemplate({ ...template, backgroundUrl: null }); }}
                     >
                         Remove background
-                    </button>
-                )}
-            </div>
-
-            {/* ── Header Image (user page banner) ── */}
-            <div className="sidebar-section">
-                <div className="sidebar-label">Header Image</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
-                    Shown in the user page header (right side)
-                </div>
-                <div
-                    className="upload-zone"
-                    onClick={() => headerInputRef.current?.click()}
-                >
-                    {template.headerUrl ? (
-                        <>
-                            <img
-                                src={template.headerUrl}
-                                alt="Header preview"
-                                className="upload-preview"
-                                style={{ maxHeight: 60 }}
-                            />
-                            <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>Click to change</div>
-                        </>
-                    ) : (
-                        <>
-                            <svg className="upload-zone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 32, height: 32 }}>
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <div className="upload-zone-text">Click to upload header</div>
-                            <div className="upload-zone-hint">Logo or banner image</div>
-                        </>
-                    )}
-                    <input
-                        type="file"
-                        ref={headerInputRef}
-                        onChange={handleHeaderUpload}
-                        accept="image/png,image/jpeg,image/svg+xml"
-                        style={{ display: 'none' }}
-                    />
-                </div>
-                {template.headerUrl && (
-                    <button
-                        className="btn btn-danger-ghost"
-                        style={{ marginTop: 8, width: '100%' }}
-                        onClick={(e) => { e.stopPropagation(); setTemplate({ ...template, headerUrl: null }); }}
-                    >
-                        Remove header
                     </button>
                 )}
             </div>

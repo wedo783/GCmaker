@@ -202,10 +202,10 @@ const UserPage: React.FC = () => {
 
                     {/* Right side — header banner + language toggle */}
                     <div className="user-header-right">
-                        {activeTemplate.headerUrl && (
+                        {(language === 'en' ? settings.logoUrlEn : settings.logoUrlAr) && (
                             <img
-                                src={activeTemplate.headerUrl}
-                                alt="Header"
+                                src={(language === 'en' ? settings.logoUrlEn : settings.logoUrlAr) as string}
+                                alt="Occasion Logo"
                                 className="user-header-banner"
                             />
                         )}
