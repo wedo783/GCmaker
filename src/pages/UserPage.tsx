@@ -236,27 +236,12 @@ const UserPage: React.FC = () => {
 
                 {/* Navbar for active Occasions */}
                 {occasions.length > 0 && (
-                    <div className="user-occasions-nav" style={{
-                        gap: 12, padding: '12px 20px',
-                        overflowX: 'auto', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid rgba(255,255,255,0.05)',
-                        justifyContent: 'center',
-                        display: 'flex'
-                    }}>
+                    <div className="user-occasions-nav">
                         {occasions.map(occ => (
                             <a
                                 key={occ.slug}
                                 href={`/${occ.slug}`}
-                                style={{
-                                    padding: '8px 16px',
-                                    borderRadius: 99,
-                                    whiteSpace: 'nowrap',
-                                    fontSize: 14,
-                                    fontWeight: 600,
-                                    textDecoration: 'none',
-                                    transition: 'all 0.2s',
-                                    color: (activeTemplate?.slug === occ.slug) ? '#fff' : 'var(--text-secondary)',
-                                    background: (activeTemplate?.slug === occ.slug) ? 'var(--accent)' : 'rgba(255,255,255,0.05)'
-                                }}
+                                className={`occasion-pill ${activeTemplate?.slug === occ.slug ? 'active' : ''}`}
                             >
                                 {occ.slug.replace(/-/g, ' ')}
                             </a>
