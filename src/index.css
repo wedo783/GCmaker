@@ -2,11 +2,7 @@
 /* Arabic UI font: Luma — place files in /public/fonts/ */
 @font-face {
   font-family: 'Luma';
-  src:
-    url('/fonts/Luma-Regular.woff2') format('woff2'),
-    url('/fonts/Luma-Regular.woff') format('woff'),
-    url('/fonts/Luma-Regular.ttf') format('truetype'),
-    url('/fonts/Luma.otf') format('opentype');
+  src: url('/fonts/Luma-Regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -14,11 +10,7 @@
 
 @font-face {
   font-family: 'Luma';
-  src:
-    url('/fonts/Luma-Semibold.woff2') format('woff2'),
-    url('/fonts/Luma-Semibold.woff') format('woff'),
-    url('/fonts/Luma-Semibold.ttf') format('truetype'),
-    url('/fonts/Luma-SemiBold.otf') format('opentype');
+  src: url('/fonts/Luma-SemiBold.otf') format('opentype');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -26,11 +18,7 @@
 
 @font-face {
   font-family: 'Luma';
-  src:
-    url('/fonts/Luma-Bold.woff2') format('woff2'),
-    url('/fonts/Luma-Bold.woff') format('woff'),
-    url('/fonts/Luma-Bold.ttf') format('truetype'),
-    url('/fonts/Luma-Bold.otf') format('opentype');
+  src: url('/fonts/Luma-SemiBold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -39,11 +27,7 @@
 /* English UI font: Karbon — place files in /public/fonts/ */
 @font-face {
   font-family: 'Karbon';
-  src:
-    url('/fonts/Karbon-Regular.woff2') format('woff2'),
-    url('/fonts/Karbon-Regular.woff') format('woff'),
-    url('/fonts/Karbon-Regular.ttf') format('truetype'),
-    url('/fonts/Karbon-Regular.otf') format('opentype');
+  src: url('/fonts/Karbon-Regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -51,11 +35,7 @@
 
 @font-face {
   font-family: 'Karbon';
-  src:
-    url('/fonts/Karbon-Semibold.woff2') format('woff2'),
-    url('/fonts/Karbon-Semibold.woff') format('woff'),
-    url('/fonts/Karbon-Semibold.ttf') format('truetype'),
-    url('/fonts/Karbon-Semibold.otf') format('opentype');
+  src: url('/fonts/Karbon-Semibold.otf') format('opentype');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -63,11 +43,7 @@
 
 @font-face {
   font-family: 'Karbon';
-  src:
-    url('/fonts/Karbon-Bold.woff2') format('woff2'),
-    url('/fonts/Karbon-Bold.woff') format('woff'),
-    url('/fonts/Karbon-Bold.ttf') format('truetype'),
-    url('/fonts/Karbon-Bold.otf') format('opentype');
+  src: url('/fonts/Karbon-Semibold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -1457,4 +1433,11 @@ input[type="range"]::-webkit-slider-thumb {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+input, textarea, .form-input, .form-textarea, .user-field-input {
+  font-family: var(--font-en);
+}
+
+[dir="rtl"] input, [dir="rtl"] textarea, input[dir="rtl"], textarea[dir="rtl"], .form-input[dir="rtl"], .form-textarea[dir="rtl"], .user-field-input[dir="rtl"] {
+  font-family: var(--font-ar);
 }
